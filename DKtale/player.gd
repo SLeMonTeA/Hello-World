@@ -65,6 +65,12 @@ var interacting_with:Array[Interactable]
 @onready var invincible_timer: Timer = $InvincibleTimer
 @onready var slide_request_timer: Timer = $SlideRequestTimer
 @onready var interaction_icon: AnimatedSprite2D = $InteractionIcon
+@onready var game_over_screen: Control = $CanvasLayer/GameOverScreen
+@onready var pause_screen: Control = $CanvasLayer/PauseScreen
+
+
+func _ready() -> void:
+	stand(default_gravity,0.01)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("jump"):
@@ -83,6 +89,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		
 	if event.is_action_pressed("interact") and interacting_with:
 		interacting_with.back().interact()
+	
+	if event.is_action_pressed("pause"):
+		pause_screen.show_pause()
 
 
 func tick_physics(state:State,delta: float) -> void:
@@ -158,7 +167,7 @@ func slide(delta:float)->void:
 	move_and_slide()
 
 func die()->void:
-	get_tree().reload_current_scene()
+	game_over_screen.show_game_over()
 
 func register_interactable(v:Interactable)->void:
 	if state_machine.current_state==State.DYING:
@@ -296,6 +305,8 @@ func transition_state(from:State,to:State)->void:
 			velocity.y=JUMP_VELOCITY
 			coyote_timer.stop()
 			jump_request_timer.stop()
+			#jump.play()
+			SoundManager.play_sfx("Jump")
 			
 		State.FALL:
 			animation_player.play("fall")
@@ -318,6 +329,8 @@ func transition_state(from:State,to:State)->void:
 		State.ATTACK_1:
 			animation_player.play("attack_1")
 			is_combo_requested=false
+			#attack.play()
+			SoundManager.play_sfx("Attack")
 		
 		State.ATTACK_2:
 			animation_player.play("attack_2")
@@ -329,6 +342,9 @@ func transition_state(from:State,to:State)->void:
 			
 		State.HURT:
 			animation_player.play("hurt")
+			
+			#Input.start_joy_vibration(0,0,0.8,0.8)
+			Game.shake_camera(4)
 			
 			stats.health-=pending_damage.amount
 			
@@ -366,3 +382,11 @@ func _on_hurtbox_hurt(hitbox: Hitbox) -> void:
 	pending_damage=Damage.new()
 	pending_damage.amount=1
 	pending_damage.source=hitbox.owner
+
+
+func _on_hitbox_hit(hurtbox: Variant) -> void:
+	Game.shake_camera(2)
+	
+	Engine.time_scale=0.01
+	await  get_tree().create_timer(0.05,true,false,true).timeout
+	Engine.time_scale=1

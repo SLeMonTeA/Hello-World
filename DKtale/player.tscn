@@ -1,4 +1,4 @@
-[gd_scene load_steps=35 format=3 uid="uid://vfhr00gj04i"]
+[gd_scene load_steps=44 format=3 uid="uid://vfhr00gj04i"]
 
 [ext_resource type="Script" path="res://player.gd" id="1_rji4x"]
 [ext_resource type="Texture2D" uid="uid://dqhwypc5pyyg1" path="res://assets/generic_char_v0.2/png/blue/char_blue_1.png" id="2_igc8i"]
@@ -7,7 +7,12 @@
 [ext_resource type="Script" path="res://classes/Hurtbox.gd" id="3_wde7e"]
 [ext_resource type="Script" path="res://classes/Hitbox.gd" id="4_pwpfg"]
 [ext_resource type="PackedScene" uid="uid://ytoftcyu4bag" path="res://ui/status_panel.tscn" id="8_1a10d"]
+[ext_resource type="PackedScene" uid="uid://dtdg80f4vp0sp" path="res://ui/game_over_screen.tscn" id="8_71uul"]
+[ext_resource type="PackedScene" uid="uid://hplfj4ibf4hs" path="res://ui/virtual_joypad.tscn" id="8_a5rby"]
 [ext_resource type="Texture2D" uid="uid://dt0r02aiukxx" path="res://assets/gdb-gamepad-2(all)/gdb-keyboard-2.png" id="9_b67wn"]
+[ext_resource type="PackedScene" uid="uid://bcqk8tbxkwugf" path="res://ui/pause_screen.tscn" id="9_chxcv"]
+[ext_resource type="Texture2D" uid="uid://bdscabujopktr" path="res://assets/gdb-gamepad-2(all)/gdb-xbox-2.png" id="11_g4tnw"]
+[ext_resource type="Script" path="res://classes/InteractionIcon.gd" id="12_68l2j"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_6road"]
 size = Vector2(13, 30)
@@ -2303,6 +2308,22 @@ region = Rect2(96, 272, 16, 16)
 atlas = ExtResource("9_b67wn")
 region = Rect2(96, 384, 16, 16)
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_xh000"]
+atlas = ExtResource("11_g4tnw")
+region = Rect2(48, 80, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k5crh"]
+atlas = ExtResource("11_g4tnw")
+region = Rect2(64, 80, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_44eam"]
+atlas = ExtResource("11_g4tnw")
+region = Rect2(80, 80, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rvl1v"]
+atlas = ExtResource("11_g4tnw")
+region = Rect2(96, 80, 16, 16)
+
 [sub_resource type="SpriteFrames" id="SpriteFrames_do7sp"]
 animations = [{
 "frames": [{
@@ -2319,8 +2340,25 @@ animations = [{
 "texture": SubResource("AtlasTexture_7x4rr")
 }],
 "loop": true,
-"name": &"default",
+"name": &"keyboard",
 "speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xh000")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_k5crh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_44eam")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rvl1v")
+}],
+"loop": true,
+"name": &"xbox",
+"speed": 5.0
 }]
 
 [node name="Player" type="CharacterBody2D"]
@@ -2380,6 +2418,7 @@ position = Vector2(-0.5, -15)
 shape = SubResource("RectangleShape2D_gdg6h")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+deterministic = true
 libraries = {
 "": SubResource("AnimationLibrary_gklxi")
 }
@@ -2404,6 +2443,7 @@ one_shot = true
 script = ExtResource("3_uad55")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
+layer = 20
 
 [node name="StatusPanel" parent="CanvasLayer" instance=ExtResource("8_1a10d")]
 offset_left = 9.0
@@ -2411,10 +2451,20 @@ offset_top = 9.0
 offset_right = 97.0
 offset_bottom = 35.0
 
+[node name="VirtualJoypad" parent="CanvasLayer" instance=ExtResource("8_a5rby")]
+modulate = Color(1, 1, 1, 0.494118)
+
+[node name="GameOverScreen" parent="CanvasLayer" instance=ExtResource("8_71uul")]
+
+[node name="PauseScreen" parent="CanvasLayer" instance=ExtResource("9_chxcv")]
+
 [node name="InteractionIcon" type="AnimatedSprite2D" parent="."]
 position = Vector2(0, -44)
 sprite_frames = SubResource("SpriteFrames_do7sp")
+animation = &"keyboard"
 autoplay = "default"
 frame_progress = 0.367896
+script = ExtResource("12_68l2j")
 
 [connection signal="hurt" from="Graphics/Hurtbox" to="." method="_on_hurtbox_hurt"]
+[connection signal="hit" from="Graphics/Hitbox" to="." method="_on_hitbox_hit"]

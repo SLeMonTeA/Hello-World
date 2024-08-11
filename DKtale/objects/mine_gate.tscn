@@ -8,6 +8,8 @@ size = Vector2(54, 73)
 
 [node name="MineGate" type="Area2D"]
 script = ExtResource("1_hnw87")
+path = null
+entry_point = null
 
 [node name="Buildings" type="Sprite2D" parent="."]
 position = Vector2(-39, -53)
